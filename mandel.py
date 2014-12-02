@@ -17,14 +17,15 @@ class Mandelbrot():
         self.height = height
         self.width = width
 
-
         self.center_x = 0.
         self.center_y = 0.
 
         self.zoom_x = 1.5
         self.zoom_y = 1.
-
-
+        self.color_func = cm.gist_earth
+        self.color_options = [cm.gist_earth, cm.gist_gray, cm.autumn,
+                               cm.seismic, cm.bwr, cm.RdGy]
+        self.color_opt = 0;
     def create_fractal(self,min_x, max_x, min_y, max_y):
 
         self.pixel_size_x = (max_x - min_x) / self.width
@@ -51,12 +52,12 @@ class Mandelbrot():
 
         #normalise
         self.image = self.image / self.image.max()
-        im = Image.fromarray(cm.gist_earth(self.image,bytes=True)) 
+        im = Image.fromarray(self.color_func(self.image,bytes=True)) 
         photo_im = ImageTk.PhotoImage(im)
         w.config(image=photo_im)
         w.image = photo_im
 
-    def zoom_in(self,e):
+    def zoom_in(self,e=None):
         self.zoom_x = self.zoom_x / 2.
         self.zoom_y = self.zoom_y / 2.
         min_x = self.center_x - self.zoom_x
@@ -69,12 +70,12 @@ class Mandelbrot():
 
         #normalise
         self.image = self.image / self.image.max()
-        im = Image.fromarray(cm.gist_earth(self.image,bytes=True)) 
+        im = Image.fromarray(self.color_func(self.image,bytes=True)) 
         photo_im = ImageTk.PhotoImage(im)
         w.config(image=photo_im)
         w.image = photo_im
 
-    def zoom_out(self, e):
+    def zoom_out(self, e=None):
         self.zoom_x = self.zoom_x * 2.
         self.zoom_y = self.zoom_y * 2.
         min_x = self.center_x - self.zoom_x
@@ -87,7 +88,43 @@ class Mandelbrot():
 
         #normalise
         self.image = self.image / self.image.max()
-        im = Image.fromarray(cm.gist_earth(self.image,bytes=True)) 
+        im = Image.fromarray(self.color_func(self.image,bytes=True)) 
+        photo_im = ImageTk.PhotoImage(im)
+        w.config(image=photo_im)
+        w.image = photo_im
+
+    def change_color(self, e=None):
+        min_x = self.center_x - self.zoom_x
+        max_x = self.center_x + self.zoom_x
+        min_y = self.center_y - self.zoom_y
+        max_y = self.center_y + self.zoom_y
+
+        self.color_opt = (self.color_opt + 1) % len(self.color_options)
+        self.color_func = self.color_options[self.color_opt]
+
+        #self.create_fractal(min_x, max_x, min_y, max_y)
+
+        #normalise
+        self.image = self.image / self.image.max()
+        im = Image.fromarray(self.color_func(self.image,bytes=True)) 
+        photo_im = ImageTk.PhotoImage(im)
+        w.config(image=photo_im)
+        w.image = photo_im
+
+    def change_color_back(self, e=None):
+        min_x = self.center_x - self.zoom_x
+        max_x = self.center_x + self.zoom_x
+        min_y = self.center_y - self.zoom_y
+        max_y = self.center_y + self.zoom_y
+
+        self.color_opt = (self.color_opt - 1) % len(self.color_options)
+        self.color_func = self.color_options[self.color_opt]
+
+        #self.create_fractal(min_x, max_x, min_y, max_y)
+
+        #normalise
+        self.image = self.image / self.image.max()
+        im = Image.fromarray(self.color_func(self.image,bytes=True)) 
         photo_im = ImageTk.PhotoImage(im)
         w.config(image=photo_im)
         w.image = photo_im
@@ -115,7 +152,7 @@ def mandel(x, y, max_iters):
 
 if __name__ == '__main__':
 
-    mb = Mandelbrot(20,200,300)
+    mb = Mandelbrot(100,240,320)
     mb.create_fractal(-2.0,1.0,-1.0,1.0)
 
 
@@ -123,26 +160,37 @@ if __name__ == '__main__':
 
 
     mb.image = mb.image / mb.image.max()
-    im = Image.fromarray(cm.gist_earth(mb.image,bytes=True))
+    im = Image.fromarray(mb.color_func(mb.image,bytes=True))
     
     photo_im = ImageTk.PhotoImage(im)
+
 
     w = Tkinter.Label(root, image=photo_im)
     w.image = photo_im
     w.pack()
-
+    """
+    b1 = Tkinter.Button(root, text="exit")
+    b1.configure(command=root.quit)
+    b1.pack()
+    b2 = Tkinter.Button(root, text="+")
+    b2.configure(command=mb.zoom_in)
+    b2.pack()
+    b3 = Tkinter.Button(root, text="-")
+    b3.configure(command=mb.zoom_out)
+    b3.pack()
+    """
     wid, hei = root.winfo_screenwidth(), root.winfo_screenheight()
     root.overrideredirect(True)
     root.geometry("%dx%d+0+0" % (wid, hei))
     root.focus_set() # <-- move focus to this widget
-    
+    w.focus_set()
 
     root.bind("<Escape>", lambda e: root.quit())
-    root.bind("<Button-2>", lambda e: root.quit())
+    w.bind("<Button-2>", lambda e: sys.exit())
 
-
-    root.bind("<Button-1>", lambda event: mb.move(event))
-    root.bind("z", lambda event: mb.zoom_in(event))
-    root.bind("x", lambda event: mb.zoom_out(event))
-    
+    w.bind("<Button-1>", lambda event: mb.move(event))
+    w.bind("<Double-Button-1>",lambda event: mb.zoom_in(event))
+    w.bind("<Double-Button-3>",lambda event: mb.zoom_out(event))
+    w.bind("<Button-4>", lambda event: mb.change_color(event))
+    w.bind("<Button-5>", lambda event: mb.change_color_back(event))
     root.mainloop()
