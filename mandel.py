@@ -1,3 +1,5 @@
+#Mandelbrot generation code (mandel, create_fractal) based on
+#http://nbviewer.ipython.org/gist/harrism/f5707335f40af9463c43
 import numpy as np
 #from pylab import imshow, show
 #from timeit import default_timer as timer
