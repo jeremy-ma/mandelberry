@@ -6,7 +6,7 @@ import Image, ImageTk
 import Tkinter
 from matplotlib import cm
 import sys
-from numba import autojit
+#from numba import autojit
 #import time
 
 class Mandelbrot():
@@ -133,21 +133,17 @@ class Mandelbrot():
         w.config(image=photo_im)
         w.image = photo_im
 
-@autojit
-def mandel(x, y, max_iters):
-    """
-    Given the real and imaginary parts of a complex number,
-    determine if it is a candidate for membership in the Mandelbrot
-    set given a fixed number of iterations.
-    """
+#@autojit
+def mandel(x, y, iters):
+
     c = complex(x, y)
     z = 0.0j
-    for i in range(max_iters):
+    for i in range(iters):
         z = z*z + c
         if (z.real*z.real + z.imag*z.imag) >= 4:
             return i
 
-    return max_iters
+    return iters
 
 
 
@@ -184,7 +180,7 @@ if __name__ == '__main__':
     b3.pack()
     """
     wid, hei = root.winfo_screenwidth(), root.winfo_screenheight()
-    root.overrideredirect(True)
+    #root.overrideredirect(True)
     root.geometry("%dx%d+0+0" % (wid, hei))
     root.focus_set() # <-- move focus to this widget
     w.focus_set()
