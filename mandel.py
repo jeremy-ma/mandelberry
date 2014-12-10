@@ -6,6 +6,7 @@ import Image, ImageTk
 import Tkinter
 from matplotlib import cm
 import sys
+from numba import autojit
 #import time
 
 class Mandelbrot():
@@ -26,6 +27,8 @@ class Mandelbrot():
         self.color_options = [cm.gist_earth, cm.gist_gray, cm.autumn,
                                cm.seismic, cm.bwr, cm.RdGy]
         self.color_opt = 0;
+    
+    #@autojit
     def create_fractal(self,min_x, max_x, min_y, max_y):
 
         self.pixel_size_x = (max_x - min_x) / self.width
@@ -57,6 +60,7 @@ class Mandelbrot():
         w.config(image=photo_im)
         w.image = photo_im
 
+    
     def zoom_in(self,e=None):
         self.zoom_x = self.zoom_x / 2.
         self.zoom_y = self.zoom_y / 2.
@@ -129,7 +133,7 @@ class Mandelbrot():
         w.config(image=photo_im)
         w.image = photo_im
 
-
+@autojit
 def mandel(x, y, max_iters):
     """
     Given the real and imaginary parts of a complex number,
